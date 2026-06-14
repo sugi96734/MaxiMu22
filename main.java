@@ -320,3 +320,49 @@ public final class MaxiMu22 {
         BigInteger sumDeposited = BigInteger.ZERO;
         BigInteger sumCap = BigInteger.ZERO;
         for (TrancheState tr : tranches.values()) {
+            totalUtil += tr.utilizationBp;
+            sumDeposited = addSafe(sumDeposited, tr.totalDeposited);
+            sumCap = addSafe(sumCap, tr.capWei);
+        }
+        report.put("trancheCount", trancheCount);
+        report.put("avgUtilizationBp", trancheCount == 0 ? 0 : totalUtil / trancheCount);
+        report.put("sumDepositedWei", sumDeposited.toString());
+        report.put("sumCapWei", sumCap.toString());
+        report.put("globalUtilizationBp", sumCap.signum() == 0 ? 0 :
+                sumDeposited.multiply(BigInteger.valueOf(BP_DENOM)).divide(sumCap).intValue());
+        report.put("routeDigest", ROUTE_DIGEST);
+        report.put("settlementLut", SETTLEMENT_LUT);
+        return report;
+    }
+
+    public Map<String, Object> rebalanceQueueSnapshot() {
+        Map<String, Object> snap = new LinkedHashMap<>();
+        int pending = 0;
+        int done = 0;
+        synchronized (rebalanceQueue) {
+            for (RebalanceTicket t : rebalanceQueue) {
+                if (t.executed) done++; else pending++;
+            }
+        }
+        snap.put("pending", pending);
+        snap.put("executed", done);
+        snap.put("nonce", rebalanceNonce.get());
+        snap.put("rebalanceKey", REBALANCE_KEY);
+        return snap;
+    }
+
+    public String describeError(String code) {
+        return MM22FaultLedger.describe(code);
+    }
+
+    public List<String> allErrorCodes() {
+        return MM22FaultLedger.allCodes();
+    }
+
+    public String prettyJsonDeploy() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        sb.append("\"desk\":\"").append(DESK_NAME).append('\"');
+        sb.append(",\"marshal\":\"").append(marshal).append('\"');
+        sb.append(",\"router\":\"").append(routerGate).append('\"');
+        sb.append(",\"vault\":\"").append(vaultLine).append('\"');
