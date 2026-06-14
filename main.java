@@ -228,3 +228,49 @@ public final class MaxiMu22 {
             to.utilizationBp = computeUtilizationBp(to);
             t.executed = true;
             executed++;
+            emit("Rebalanced", t.fromTranche, t.toTranche.hashCode(), t.ticketId);
+        }
+        return executed;
+    }
+
+    public BigInteger quoteRouteFee(BigInteger amountWei, int routeIndex) {
+        if (routeIndex < 0 || routeIndex >= routeTable.size()) throw new IllegalArgumentException("MM22_BadRoute");
+        RouteHop hop = routeTable.get(routeIndex);
+        return amountWei.multiply(BigInteger.valueOf(hop.feeBps)).divide(BigInteger.valueOf(BP_DENOM));
+    }
+
+    public String routeDigest(int routeIndex) {
+        if (routeIndex < 0 || routeIndex >= routeTable.size()) throw new IllegalArgumentException("MM22_BadRoute");
+        RouteHop hop = routeTable.get(routeIndex);
+        return keccakHex(hop.chainId, hop.relay, hop.feeBps, hop.minConfirmations);
+    }
+
+    public BigInteger healthScore(String trancheId) {
+        TrancheState tr = tranches.get(trancheId);
+        if (tr == null) return BigInteger.ZERO;
+        BigInteger utilWad = BigInteger.valueOf(tr.utilizationBp).multiply(WAD).divide(BigInteger.valueOf(BP_DENOM));
+        BigInteger riskPenalty = BigInteger.valueOf(tr.riskBand * 15L).multiply(WAD).divide(BigInteger.valueOf(100));
+        BigInteger base = WAD.multiply(BigInteger.valueOf(2));
+        BigInteger adj = base.add(utilWad).subtract(riskPenalty);
+        return adj.signum() < 0 ? BigInteger.ZERO : adj;
+    }
+
+    public Map<String, Object> snapshotTranche(String trancheId) {
+        TrancheState tr = tranches.get(trancheId);
+        if (tr == null) throw new IllegalArgumentException("MM22_UnknownTranche");
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", tr.trancheId);
+        m.put("riskBand", tr.riskBand);
+        m.put("baseAprBp", tr.baseAprBp);
+        m.put("dynamicAprBp", dynamicAprBp(tr));
+        m.put("capWei", tr.capWei.toString());
+        m.put("depositedWei", tr.totalDeposited.toString());
+        m.put("accruedYieldWei", tr.accruedYieldWei.toString());
+        m.put("feeAccruedWei", tr.feeAccruedWei.toString());
+        m.put("utilizationBp", tr.utilizationBp);
+        m.put("healthWad", healthScore(trancheId).toString());
+        m.put("lastAccrualBlock", tr.lastAccrualBlock);
+        return m;
+    }
+
+    public Map<String, Object> deskDigest() {
