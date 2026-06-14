@@ -412,3 +412,49 @@ public final class MaxiMu22 {
             if (code == null) return "MM22_Unknown";
             switch (code) {
                 case MM22_LanePaused: return "Desk lane is paused";
+                case MM22_NotMarshal: return "Caller is not marshal";
+                case MM22_LineExists: return "Epoch line already opened";
+                case MM22_LineCap: return "Epoch line capacity reached";
+                case MM22_UnknownLine: return "Epoch line not found";
+                case MM22_EmptyTranche: return "Tranche id empty";
+                case MM22_TrancheExists: return "Tranche already registered";
+                case MM22_TrancheCap: return "Tranche registry full";
+                case MM22_BadRiskBand: return "Risk band out of range";
+                case MM22_BadApr: return "Base APR out of bounds";
+                case MM22_BadCap: return "Cap must be positive";
+                case MM22_BadDepositor: return "Depositor address invalid";
+                case MM22_UnknownTranche: return "Tranche not found";
+                case MM22_ZeroAmount: return "Amount must be positive";
+                case MM22_CapExceeded: return "Tranche cap exceeded";
+                case MM22_NoBalance: return "No depositor balance";
+                case MM22_Insufficient: return "Insufficient principal";
+                case MM22_QueueFull: return "Rebalance queue full";
+                case MM22_BadRoute: return "Route index invalid";
+                case MM22_BadMarshal: return "Marshal address invalid";
+                case MM22_BadRouter: return "Router address invalid";
+                case MM22_BadVault: return "Vault address invalid";
+                case MM22_BadOracle: return "Oracle address invalid";
+                case MM22_BadFeeSink: return "Fee collector invalid";
+                case MM22_DigestFail: return "Digest computation failed";
+                default: return "Unmapped fault: " + code;
+            }
+        }
+
+        static List<String> allCodes() {
+            return List.of(MM22_LanePaused, MM22_NotMarshal, MM22_LineExists, MM22_LineCap, MM22_UnknownLine,
+                    MM22_EmptyTranche, MM22_TrancheExists, MM22_TrancheCap, MM22_BadRiskBand, MM22_BadApr,
+                    MM22_BadCap, MM22_BadDepositor, MM22_UnknownTranche, MM22_ZeroAmount, MM22_CapExceeded,
+                    MM22_NoBalance, MM22_Insufficient, MM22_QueueFull, MM22_BadRoute, MM22_BadMarshal,
+                    MM22_BadRouter, MM22_BadVault, MM22_BadOracle, MM22_BadFeeSink, MM22_DigestFail);
+        }
+    }
+
+    private void seedRouteTable() {
+        routeTable.add(new RouteHop(421883, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 14, 6));
+        routeTable.add(new RouteHop(338291, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 27, 11));
+        routeTable.add(new RouteHop(591044, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 33, 4));
+        routeTable.add(new RouteHop(712556, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 19, 15));
+        routeTable.add(new RouteHop(204118, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 41, 8));
+        routeTable.add(new RouteHop(877329, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 22, 12));
+        routeTable.add(new RouteHop(463701, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 55, 3));
+        routeTable.add(new RouteHop(928415, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 17, 18));
