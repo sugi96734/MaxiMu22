@@ -136,3 +136,49 @@ public final class MaxiMu22 {
         if (trancheCount >= MAX_TRANCHES) throw new IllegalStateException("MM22_TrancheCap");
         if (riskBand < 1 || riskBand > 4) throw new IllegalArgumentException("MM22_BadRiskBand");
         if (baseAprBp < 50 || baseAprBp > 1200) throw new IllegalArgumentException("MM22_BadApr");
+        if (capWei == null || capWei.signum() <= 0) throw new IllegalArgumentException("MM22_BadCap");
+        tranches.put(trancheId, new TrancheState(trancheId, riskBand, baseAprBp, clampU256(capWei)));
+        trancheCount++;
+        emit("Registered", trancheId, riskBand, baseAprBp);
+    }
+
+    public void deposit(String depositor, String trancheId, BigInteger amountWei) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        String who = requireAddr(depositor, "MM22_BadDepositor");
+        TrancheState tr = tranches.get(trancheId);
+        if (tr == null) throw new IllegalArgumentException("MM22_UnknownTranche");
+        if (amountWei == null || amountWei.signum() <= 0) throw new IllegalArgumentException("MM22_ZeroAmount");
+        BigInteger next = addSafe(tr.totalDeposited, amountWei);
+        if (next.compareTo(tr.capWei) > 0) throw new IllegalStateException("MM22_CapExceeded");
+        tr.totalDeposited = next;
+        DepositorLedger ledger = ledgers.computeIfAbsent(ledgerKey(who, trancheId), k -> new DepositorLedger(who, trancheId));
+        ledger.principalWei = addSafe(ledger.principalWei, amountWei);
+        ledger.lastTouchEpoch = epochCounter.get();
+        tr.utilizationBp = computeUtilizationBp(tr);
+        emit("Deposited", who, trancheId.hashCode(), amountWei.longValue());
+    }
+
+    public void withdraw(String depositor, String trancheId, BigInteger amountWei) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        String who = requireAddr(depositor, "MM22_BadDepositor");
+        TrancheState tr = tranches.get(trancheId);
+        if (tr == null) throw new IllegalArgumentException("MM22_UnknownTranche");
+        DepositorLedger ledger = ledgers.get(ledgerKey(who, trancheId));
+        if (ledger == null || ledger.principalWei.signum() == 0) throw new IllegalStateException("MM22_NoBalance");
+        if (amountWei == null || amountWei.signum() <= 0) throw new IllegalArgumentException("MM22_ZeroAmount");
+        if (amountWei.compareTo(ledger.principalWei) > 0) throw new IllegalStateException("MM22_Insufficient");
+        ledger.principalWei = subSafe(ledger.principalWei, amountWei);
+        tr.totalDeposited = subSafe(tr.totalDeposited, amountWei);
+        tr.utilizationBp = computeUtilizationBp(tr);
+        emit("Withdrawn", who, trancheId.hashCode(), amountWei.longValue());
+    }
+
+    public BigInteger accrueYield(String trancheId, long blocksElapsed) {
+        TrancheState tr = tranches.get(trancheId);
+        if (tr == null) throw new IllegalArgumentException("MM22_UnknownTranche");
+        if (blocksElapsed <= 0 || tr.totalDeposited.signum() == 0) return BigInteger.ZERO;
+        BigInteger dynamicAprBp = dynamicAprBp(tr);
+        BigInteger gross = tr.totalDeposited
+                .multiply(dynamicAprBp)
+                .multiply(BigInteger.valueOf(blocksElapsed))
+                .divide(BigInteger.valueOf(BP_DENOM))
