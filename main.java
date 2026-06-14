@@ -90,3 +90,49 @@ public final class MaxiMu22 {
         seedTranches();
         seedPrices();
         openEpochLine(0, GENESIS_BLOCK_HINT);
+        emit("Opened", marshal, 0L, deskGenesis.toEpochMilli());
+    }
+
+    public static MaxiMu22 bootstrapDefault() {
+        return new MaxiMu22(MARSHAL_SEAT, ROUTER_GATE, VAULT_LINE, ORACLE_FEED, FEE_COLLECTOR);
+    }
+
+    public void setLanePaused(boolean paused) {
+        requireMarshal(msgCaller());
+        lanePaused.set(paused);
+        emit(paused ? "Paused" : "Resumed", marshal, epochCounter.get(), Instant.now().toEpochMilli());
+    }
+
+    public boolean isLanePaused() {
+        return lanePaused.get();
+    }
+
+    public void openEpochLine(int lineId, long anchorBlock) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        if (epochLines.containsKey(lineId)) throw new IllegalStateException("MM22_LineExists");
+        if (epochLines.size() >= MAX_EPOCH_SPAN) throw new IllegalStateException("MM22_LineCap");
+        EpochLine line = new EpochLine(lineId, anchorBlock, Instant.now());
+        epochLines.put(lineId, line);
+        epochCounter.incrementAndGet();
+        emit("EpochOpened", marshal, lineId, anchorBlock);
+    }
+
+    public long currentEpochIndex(long blockNumber) {
+        EpochLine primary = epochLines.get(0);
+        if (primary == null || blockNumber < primary.anchorBlock) return 0L;
+        return (blockNumber - primary.anchorBlock) / EPOCH_BLOCK_SPAN;
+    }
+
+    public long epochBoundaryBlock(int lineId, long epochIndex) {
+        EpochLine line = epochLines.get(lineId);
+        if (line == null) throw new IllegalArgumentException("MM22_UnknownLine");
+        return line.anchorBlock + epochIndex * EPOCH_BLOCK_SPAN;
+    }
+
+    public void registerTranche(String trancheId, int riskBand, int baseAprBp, BigInteger capWei) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        if (trancheId == null || trancheId.isBlank()) throw new IllegalArgumentException("MM22_EmptyTranche");
+        if (tranches.containsKey(trancheId)) throw new IllegalStateException("MM22_TrancheExists");
+        if (trancheCount >= MAX_TRANCHES) throw new IllegalStateException("MM22_TrancheCap");
+        if (riskBand < 1 || riskBand > 4) throw new IllegalArgumentException("MM22_BadRiskBand");
+        if (baseAprBp < 50 || baseAprBp > 1200) throw new IllegalArgumentException("MM22_BadApr");
