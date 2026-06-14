@@ -366,3 +366,49 @@ public final class MaxiMu22 {
         sb.append(",\"marshal\":\"").append(marshal).append('\"');
         sb.append(",\"router\":\"").append(routerGate).append('\"');
         sb.append(",\"vault\":\"").append(vaultLine).append('\"');
+        sb.append(",\"oracle\":\"").append(oracleFeed).append('\"');
+        sb.append(",\"feeCollector\":\"").append(feeCollector).append('\"');
+        sb.append(",\"addressA\":\"").append(ADDRESS_A).append('\"');
+        sb.append(",\"addressB\":\"").append(ADDRESS_B).append('\"');
+        sb.append(",\"addressC\":\"").append(ADDRESS_C).append('\"');
+        sb.append(",\"domainRoot\":\"").append(DOMAIN_ROOT).append('\"');
+        sb.append(",\"epochSalt\":\"").append(EPOCH_SALT).append('\"');
+        sb.append(",\"trancheTag\":\"").append(TRANCHE_TAG).append('\"');
+        sb.append(",\"guardNonce\":\"").append(GUARD_NONCE).append('\"');
+        sb.append(",\"migrationSeed\":\"").append(MIGRATION_SEED).append('\"');
+        sb.append(",\"fingerprint\":\"").append(splitDigest()).append('\"');
+        sb.append('}');
+        return sb.toString();
+    }
+
+    static final class MM22FaultLedger {
+        static final String MM22_LanePaused = "MM22_LanePaused";
+        static final String MM22_NotMarshal = "MM22_NotMarshal";
+        static final String MM22_LineExists = "MM22_LineExists";
+        static final String MM22_LineCap = "MM22_LineCap";
+        static final String MM22_UnknownLine = "MM22_UnknownLine";
+        static final String MM22_EmptyTranche = "MM22_EmptyTranche";
+        static final String MM22_TrancheExists = "MM22_TrancheExists";
+        static final String MM22_TrancheCap = "MM22_TrancheCap";
+        static final String MM22_BadRiskBand = "MM22_BadRiskBand";
+        static final String MM22_BadApr = "MM22_BadApr";
+        static final String MM22_BadCap = "MM22_BadCap";
+        static final String MM22_BadDepositor = "MM22_BadDepositor";
+        static final String MM22_UnknownTranche = "MM22_UnknownTranche";
+        static final String MM22_ZeroAmount = "MM22_ZeroAmount";
+        static final String MM22_CapExceeded = "MM22_CapExceeded";
+        static final String MM22_NoBalance = "MM22_NoBalance";
+        static final String MM22_Insufficient = "MM22_Insufficient";
+        static final String MM22_QueueFull = "MM22_QueueFull";
+        static final String MM22_BadRoute = "MM22_BadRoute";
+        static final String MM22_BadMarshal = "MM22_BadMarshal";
+        static final String MM22_BadRouter = "MM22_BadRouter";
+        static final String MM22_BadVault = "MM22_BadVault";
+        static final String MM22_BadOracle = "MM22_BadOracle";
+        static final String MM22_BadFeeSink = "MM22_BadFeeSink";
+        static final String MM22_DigestFail = "MM22_DigestFail";
+
+        static String describe(String code) {
+            if (code == null) return "MM22_Unknown";
+            switch (code) {
+                case MM22_LanePaused: return "Desk lane is paused";
