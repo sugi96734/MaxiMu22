@@ -182,3 +182,49 @@ public final class MaxiMu22 {
                 .multiply(dynamicAprBp)
                 .multiply(BigInteger.valueOf(blocksElapsed))
                 .divide(BigInteger.valueOf(BP_DENOM))
+                .divide(BigInteger.valueOf(365L * 24 * 60 * 60 / 12));
+        BigInteger fee = gross.multiply(BigInteger.valueOf(PROTOCOL_FEE_BP)).divide(BigInteger.valueOf(BP_DENOM));
+        BigInteger net = subSafe(gross, fee);
+        tr.accruedYieldWei = addSafe(tr.accruedYieldWei, net);
+        tr.feeAccruedWei = addSafe(tr.feeAccruedWei, fee);
+        tr.lastAccrualBlock += blocksElapsed;
+        emit("Accrued", trancheId, dynamicAprBp.longValue(), net.longValue());
+        return net;
+    }
+
+    public void enqueueRebalance(String fromTranche, String toTranche, BigInteger amountWei, long notBeforeBlock) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        requireMarshal(msgCaller());
+        if (!tranches.containsKey(fromTranche) || !tranches.containsKey(toTranche)) {
+            throw new IllegalArgumentException("MM22_UnknownTranche");
+        }
+        if (amountWei == null || amountWei.signum() <= 0) throw new IllegalArgumentException("MM22_ZeroAmount");
+        if (rebalanceQueue.size() >= MAX_REBALANCE_QUEUE) throw new IllegalStateException("MM22_QueueFull");
+        long ticketId = rebalanceNonce.incrementAndGet();
+        RebalanceTicket ticket = new RebalanceTicket(ticketId, fromTranche, toTranche, amountWei, notBeforeBlock, Instant.now());
+        rebalanceQueue.add(ticket);
+        emit("Queued", fromTranche, toTranche.hashCode(), ticketId);
+    }
+
+    public int executeRebalances(long currentBlock) {
+        if (lanePaused.get()) throw new IllegalStateException("MM22_LanePaused");
+        int executed = 0;
+        List<RebalanceTicket> ready = new ArrayList<>();
+        synchronized (rebalanceQueue) {
+            for (RebalanceTicket t : rebalanceQueue) {
+                if (!t.executed && currentBlock >= t.notBeforeBlock) ready.add(t);
+            }
+        }
+        for (RebalanceTicket t : ready) {
+            TrancheState from = tranches.get(t.fromTranche);
+            TrancheState to = tranches.get(t.toTranche);
+            if (from == null || to == null) continue;
+            if (t.amountWei.compareTo(from.totalDeposited) > 0) continue;
+            BigInteger toNext = addSafe(to.totalDeposited, t.amountWei);
+            if (toNext.compareTo(to.capWei) > 0) continue;
+            from.totalDeposited = subSafe(from.totalDeposited, t.amountWei);
+            to.totalDeposited = addSafe(to.totalDeposited, t.amountWei);
+            from.utilizationBp = computeUtilizationBp(from);
+            to.utilizationBp = computeUtilizationBp(to);
+            t.executed = true;
+            executed++;
