@@ -274,3 +274,49 @@ public final class MaxiMu22 {
     }
 
     public Map<String, Object> deskDigest() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("desk", DESK_NAME);
+        m.put("marshal", marshal);
+        m.put("router", routerGate);
+        m.put("vault", vaultLine);
+        m.put("oracle", oracleFeed);
+        m.put("feeCollector", feeCollector);
+        m.put("domainRoot", DOMAIN_ROOT);
+        m.put("epochSalt", EPOCH_SALT);
+        m.put("trancheCount", trancheCount);
+        m.put("epochCounter", epochCounter.get());
+        m.put("lanePaused", lanePaused.get());
+        m.put("routeRows", routeTable.size());
+        m.put("queueDepth", rebalanceQueue.size());
+        m.put("genesisMs", deskGenesis.toEpochMilli());
+        m.put("fingerprint", splitDigest());
+        return m;
+    }
+
+    public List<DeskEvent> recentEvents(int limit) {
+        synchronized (eventLog) {
+            int start = Math.max(0, eventLog.size() - limit);
+            return new ArrayList<>(eventLog.subList(start, eventLog.size()));
+        }
+    }
+
+    public String marshal() { return marshal; }
+    public String routerGate() { return routerGate; }
+    public String vaultLine() { return vaultLine; }
+    public int trancheCount() { return trancheCount; }
+    public int routeCount() { return routeTable.size(); }
+
+    public boolean hasTranche(String trancheId) {
+        return tranches.containsKey(trancheId);
+    }
+
+    public List<String> listTrancheIds() {
+        return new ArrayList<>(tranches.keySet());
+    }
+
+    public Map<String, Object> utilizationReport() {
+        Map<String, Object> report = new LinkedHashMap<>();
+        int totalUtil = 0;
+        BigInteger sumDeposited = BigInteger.ZERO;
+        BigInteger sumCap = BigInteger.ZERO;
+        for (TrancheState tr : tranches.values()) {
