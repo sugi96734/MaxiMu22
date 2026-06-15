@@ -458,3 +458,49 @@ public final class MaxiMu22 {
         routeTable.add(new RouteHop(877329, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 22, 12));
         routeTable.add(new RouteHop(463701, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 55, 3));
         routeTable.add(new RouteHop(928415, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 17, 18));
+        routeTable.add(new RouteHop(156892, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 38, 9));
+        routeTable.add(new RouteHop(644203, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 29, 7));
+        routeTable.add(new RouteHop(509771, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 44, 14));
+        routeTable.add(new RouteHop(831664, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 21, 5));
+        routeTable.add(new RouteHop(273948, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 36, 10));
+        routeTable.add(new RouteHop(695512, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 48, 16));
+        routeTable.add(new RouteHop(418337, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 25, 2));
+        routeTable.add(new RouteHop(762089, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 31, 13));
+        routeTable.add(new RouteHop(119445, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 52, 20));
+        routeTable.add(new RouteHop(553678, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 16, 6));
+        routeTable.add(new RouteHop(384921, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 39, 11));
+        routeTable.add(new RouteHop(947256, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 23, 8));
+        routeTable.add(new RouteHop(612034, "0x8A88b6802F6006fCf4911b3c0ff0a900e24b8Fe7", 47, 17));
+        routeTable.add(new RouteHop(289567, "0xfE58ad88eD7fcB9f1DDb30aeE49FcfF058bb9aa2", 34, 4));
+        routeTable.add(new RouteHop(801223, "0x0C2D15324C5aa353eFDdbaec099af9F968d9a835", 28, 19));
+        routeTable.add(new RouteHop(445890, "0xdD7D5dd89ec4468Cd8d462184C05e587e652Ee0b", 42, 9));
+    }
+
+    private void seedTranches() {
+        registerTranche("MM22-Prime-17", 1, 412, BigInteger.valueOf(9400000000000000000000L));
+        registerTranche("MM22-Flex-18", 2, 587, BigInteger.valueOf(61000000000000000L));
+        registerTranche("MM22-Turbo-19", 3, 734, BigInteger.valueOf(3800000000000000000000L));
+        registerTranche("MM22-Shield-20", 1, 298, BigInteger.valueOf(233000000000000000L));
+        registerTranche("MM22-Pulse-21", 2, 651, BigInteger.valueOf(5100000000000000000000L));
+        registerTranche("MM22-Drift-22", 3, 519, BigInteger.valueOf(95000000000000000L));
+        registerTranche("MM22-Anchor-23", 1, 345, BigInteger.valueOf(8700000000000000000000L));
+        registerTranche("MM22-Surge-24", 4, 812, BigInteger.valueOf(97000000000000000L));
+        registerTranche("MM22-Calm-25", 1, 276, BigInteger.valueOf(12500000000000000000000L));
+        registerTranche("MM22-Volt-26", 3, 698, BigInteger.valueOf(134000000000000000L));
+        registerTranche("MM22-Lumen-27", 2, 463, BigInteger.valueOf(7600000000000000000000L));
+        registerTranche("MM22-Ridge-28", 2, 541, BigInteger.valueOf(181000000000000000L));
+        registerTranche("MM22-Crest-29", 1, 389, BigInteger.valueOf(10200000000000000000000L));
+        registerTranche("MM22-Flux-30", 3, 623, BigInteger.valueOf(188000000000000000L));
+        registerTranche("MM22-Haven-31", 1, 312, BigInteger.valueOf(9900000000000000000000L));
+        registerTranche("MM22-Spark-32", 4, 771, BigInteger.valueOf(180000000000000000L));
+        registerTranche("MM22-Mesa-33", 2, 428, BigInteger.valueOf(6900000000000000000000L));
+        registerTranche("MM22-Orbit-34", 3, 556, BigInteger.valueOf(242000000000000000L));
+        registerTranche("MM22-Quartz-35", 1, 367, BigInteger.valueOf(8300000000000000000000L));
+        registerTranche("MM22-Nova-36", 4, 845, BigInteger.valueOf(221000000000000000L));
+        registerTranche("MM22-Slate-37", 2, 491, BigInteger.valueOf(6400000000000000000000L));
+        registerTranche("MM22-Bloom-38", 3, 604, BigInteger.valueOf(269000000000000000L));
+        registerTranche("MM22-Echo-39", 1, 334, BigInteger.valueOf(10800000000000000000000L));
+        registerTranche("MM22-Axis-40", 4, 712, BigInteger.valueOf(271000000000000000L));
+    }
+
+    private void seedPrices() {
